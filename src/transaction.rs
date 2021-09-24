@@ -774,6 +774,8 @@ pub enum SigHashType {
     /// (This rule is probably an unintentional C++ism, but it's consensus so we have
     /// to follow it.)
     Single = 0x03,
+    /// 0x41: Sign all outputs with rangeproof
+    AllPlusRangeProof = 0x41,
     /// 0x81: Sign all outputs but only this input
     AllPlusAnyoneCanPay = 0x81,
     /// 0x82: Sign no outputs and only this input
@@ -790,6 +792,7 @@ impl fmt::Display for SigHashType {
             SigHashType::All => "SIGHASH_ALL",
             SigHashType::None => "SIGHASH_NONE",
             SigHashType::Single => "SIGHASH_SINGLE",
+            SigHashType::AllPlusRangeProof => "SIGHASH_SINGLE|SIGHASH_RANGEPROOF",
             SigHashType::AllPlusAnyoneCanPay => "SIGHASH_ALL|SIGHASH_ANYONECANPAY",
             SigHashType::NonePlusAnyoneCanPay => "SIGHASH_NONE|SIGHASH_ANYONECANPAY",
             SigHashType::SinglePlusAnyoneCanPay => "SIGHASH_SINGLE|SIGHASH_ANYONECANPAY",
@@ -806,6 +809,7 @@ impl str::FromStr for SigHashType {
             "SIGHASH_ALL" => Ok(SigHashType::All),
             "SIGHASH_NONE" => Ok(SigHashType::None),
             "SIGHASH_SINGLE" => Ok(SigHashType::Single),
+            "SIGHASH_SINGLE|SIGHASH_RANGEPROOF" => Ok(SigHashType::AllPlusRangeProof),
             "SIGHASH_ALL|SIGHASH_ANYONECANPAY" => Ok(SigHashType::AllPlusAnyoneCanPay),
             "SIGHASH_NONE|SIGHASH_ANYONECANPAY" => Ok(SigHashType::NonePlusAnyoneCanPay),
             "SIGHASH_SINGLE|SIGHASH_ANYONECANPAY" => Ok(SigHashType::SinglePlusAnyoneCanPay),
@@ -821,6 +825,7 @@ impl SigHashType {
             SigHashType::All => (SigHashType::All, false),
             SigHashType::None => (SigHashType::None, false),
             SigHashType::Single => (SigHashType::Single, false),
+            SigHashType::AllPlusRangeProof => (SigHashType::All, false),
             SigHashType::AllPlusAnyoneCanPay => (SigHashType::All, true),
             SigHashType::NonePlusAnyoneCanPay => (SigHashType::None, true),
             SigHashType::SinglePlusAnyoneCanPay => (SigHashType::Single, true),
@@ -834,6 +839,7 @@ impl SigHashType {
             0x01 => SigHashType::All,
             0x02 => SigHashType::None,
             0x03 => SigHashType::Single,
+            0x41 => SigHashType::AllPlusRangeProof,
             0x81 => SigHashType::AllPlusAnyoneCanPay,
             0x82 => SigHashType::NonePlusAnyoneCanPay,
             0x83 => SigHashType::SinglePlusAnyoneCanPay,

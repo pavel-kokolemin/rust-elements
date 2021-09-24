@@ -123,7 +123,7 @@ impl<R: Deref<Target = Transaction>> SigHashCache<R> {
         }
         // ..then all outputs
         tx.output = match sighash {
-            SigHashType::All => self.tx.output.clone(),
+            SigHashType::All | SigHashType::AllPlusRangeProof => self.tx.output.clone(),
             SigHashType::Single => {
                 let output_iter = self.tx.output.iter()
                                       .take(input_index + 1)  // sign all outputs up to and including this one, but erase
@@ -296,6 +296,21 @@ impl<R: Deref<Target = Transaction>> SigHashCache<R> {
             SigHash::from_engine(single_enc).consensus_encode(&mut writer)?;
         } else {
             zero_hash.consensus_encode(&mut writer)?;
+        }
+
+        if sighash_type == SigHashType::AllPlusRangeProof {
+            let mut single_enc = SigHash::engine();
+            for output in self.tx.output.iter() {
+                output
+                    .witness
+                    .rangeproof
+                    .consensus_encode(&mut single_enc)?;
+                output
+                    .witness
+                    .surjection_proof
+                    .consensus_encode(&mut single_enc)?;
+            }
+            SigHash::from_engine(single_enc.clone()).consensus_encode(&mut writer)?;
         }
 
         self.tx.lock_time.consensus_encode(&mut writer)?;
